@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using GameStore.Api.Authorization;
 using GameStore.Api.Dtos;
 using GameStore.Api.Entities;
 using GameStore.Api.Repositories;
@@ -14,7 +16,10 @@ public static class GamesEndpoints
                        .WithParameterValidation();
 
         group.MapGet("/", async (IGamesRepository _repository) =>
-           (await _repository.GetAllAsync()).Select(game => game.AsDto()));
+        {
+            return Results.Ok((await _repository.GetAllAsync()).Select(game => game.AsDto()));
+        });
+
 
         group.MapGet("/{id}", async (IGamesRepository _repository, int id) =>
         {
@@ -24,7 +29,9 @@ public static class GamesEndpoints
 
             return Results.Ok(game.AsDto());
         })
-        .WithName(GetGameEndpointName);
+        .WithName(GetGameEndpointName)
+        .RequireAuthorization(Policies.ReadAccess);
+
 
         group.MapPost("/", async (IGamesRepository _repository, CreateGameDto gameDto) =>
         {
@@ -38,10 +45,15 @@ public static class GamesEndpoints
             };
             await _repository.CreateAsync(game);
             return Results.CreatedAtRoute(GetGameEndpointName, new { id = game.Id }, game.AsDto());
-        });
+        })
+        .RequireAuthorization(Policies.WriteAccess);
+        // .RequireAuthorization(policy =>
+        // {
+        //     policy.RequireRole("Admin");
+        // });
 
         group.MapPost("/{id}", async (IGamesRepository _repository, int id, UpdateGameDto updatedGameDto) =>
-        { 
+        {
             var existingGame = await _repository.GetAsync(id);
 
             if (existingGame is null) return Results.NotFound();
@@ -54,7 +66,8 @@ public static class GamesEndpoints
 
             await _repository.UpdateAsync(existingGame);
             return Results.NoContent();
-        });
+        })
+        .RequireAuthorization(Policies.WriteAccess);
 
         group.MapDelete("/{id}", async (IGamesRepository _repository, int id) =>
         {
@@ -64,7 +77,8 @@ public static class GamesEndpoints
                 await _repository.DeleteAsync(id);
 
             return Results.NoContent();
-        });
+        })
+        .RequireAuthorization(Policies.WriteAccess);
 
         return group;
     }

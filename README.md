@@ -14,3 +14,9 @@ dotnet user-secrets set "ConnectionStrings:GameStoreContext" "Server=localhost; 
 
 dotnet user-secrets list
 ```
+
+# Creating JWT token by commands
+```powershell
+dotnet user-jwts create --role "Admin" --scope "games:read"
+dotnet user-jwts print "Id"
+```

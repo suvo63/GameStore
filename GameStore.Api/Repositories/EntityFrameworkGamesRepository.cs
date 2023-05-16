@@ -7,9 +7,11 @@ namespace GameStore.Api.Repositories;
 public class EntityFrameworkGamesRepository : IGamesRepository
 {
     private readonly GameStoreContext _dbContext;
+    private readonly ILogger<EntityFrameworkGamesRepository> _logger;
 
-    public EntityFrameworkGamesRepository(GameStoreContext dbContext)
+    public EntityFrameworkGamesRepository(GameStoreContext dbContext, ILogger<EntityFrameworkGamesRepository> logger)
     {
+        _logger = logger;
         _dbContext = dbContext;
     }
 
@@ -25,6 +27,8 @@ public class EntityFrameworkGamesRepository : IGamesRepository
     {
         _dbContext.Games.Add(game);
         await _dbContext.SaveChangesAsync();
+
+        _logger.LogInformation("Created game {Name} with price {Price}", game.Name, game.Price);
     }
     public async Task UpdateAsync(Game updatedGame)
     {
