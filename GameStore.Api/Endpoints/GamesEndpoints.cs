@@ -20,12 +20,23 @@ public static class GamesEndpoints
                         .WithParameterValidation();
 
         // V1 GET ENDPOINTS
-        group.MapGet("/", async (IGamesRepository _repository) =>
+        group.MapGet("/", async (
+            IGamesRepository _repository,
+            ILoggerFactory loggerFactory,
+            HttpContext _http,
+            [AsParameters] GetGamesDtoV1 request
+            ) =>
         {
-            return Results.Ok((await _repository.GetAllAsync()).Select(game => game.AsDtoV1()));
+            var logger = loggerFactory.CreateLogger("Games Endpoints");
+            logger.LogInformation("Get all endpint v1");
+
+            var totalCount = await _repository.CountAsync();
+            _http.Response.AddPaginationHeader(totalCount, request.PageSize);
+
+            return Results.Ok((await _repository.GetAllAsync(request.PageNumber, request.PageSize))
+                                                .Select(game => game.AsDtoV1()));
         })
         .MapToApiVersion(1.0);
-
 
         group.MapGet("/{id}", async (IGamesRepository _repository, int id) =>
         {
@@ -40,9 +51,16 @@ public static class GamesEndpoints
         .MapToApiVersion(1.0);
 
         // V2 GET ENDPOINTS
-        group.MapGet("/", async (IGamesRepository _repository) =>
+        group.MapGet("/", async (
+            IGamesRepository _repository,
+            HttpContext _http,
+            [AsParameters] GetGamesDtoV2 request) =>
         {
-            return Results.Ok((await _repository.GetAllAsync()).Select(game => game.AsDtoV2()));
+            var totalCount = await _repository.CountAsync();
+            _http.Response.AddPaginationHeader(totalCount, request.PageSize);
+
+            return Results.Ok((await _repository.GetAllAsync(request.PageNumber, request.PageSize))
+                                                .Select(game => game.AsDtoV2()));
         })
         .MapToApiVersion(2.0); ;
 
@@ -75,10 +93,6 @@ public static class GamesEndpoints
         })
         .RequireAuthorization(Policies.WriteAccess)
         .MapToApiVersion(1.0);
-        // .RequireAuthorization(policy =>
-        // {
-        //     policy.RequireRole("Admin");
-        // });
 
         group.MapPost("/{id}", async (IGamesRepository _repository, int id, UpdateGameDto updatedGameDto) =>
         {

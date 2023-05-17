@@ -15,7 +15,8 @@ public static class CorsExtensions
 
                 corsBuilder.WithOrigins(allowedOrigin)
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .WithExposedHeaders("X-Pagination");
             });
         });
     }
