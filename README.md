@@ -20,3 +20,9 @@ dotnet user-secrets list
 dotnet user-jwts create --role "Admin" --scope "games:read"
 dotnet user-jwts print "Id"
 ```
+
+# Setting the Azure Storage Connection string to secret manager
+```powershell
+$storage_connstring="[STORAGE CONN STRING HERE]"
+dotnet user-secrets set "ConnectionStrings:AzureStorage" $storage_connstring
+```

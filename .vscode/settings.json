@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "GameStore.Api\\bin\\Release\\net7.0\\publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/72b9640f-0b26-4ff9-83f6-105ac4438845/resourceGroups/gamestore/providers/Microsoft.Web/sites/mygamestore01"
+}
